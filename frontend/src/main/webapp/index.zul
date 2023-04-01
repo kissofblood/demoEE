@@ -1,0 +1,40 @@
+<window id="win" title="demo" height="100%" width="100%" border="normal" mode="overlapped"
+        apply="com.example.frontend.controller.IndexController">
+    <custom-attributes composerName="indexController"/>
+
+    <box orient="vertical">
+        <box orient="horizontal">
+            <grid id="gridCompany" span="true" sizedByContent="true" width="600px" height="400px">
+                <columns>
+                    <column label="id"/>
+                    <column label="name"/>
+                    <column label="legalForm"/>
+                    <column label="address"/>
+                </columns>
+                <template name="model">
+                    <row value="${each}" onClick="indexController.onRowCompanyClick(self)">
+                        <label value="${each.id}"/>
+                        <label value="${each.name}"/>
+                        <label value="${each.legalForm}" id=""/>
+                        <label value="${each.address}" />
+                    </row>
+                </template>
+            </grid>
+            <grid id="gridBranch" span="true" sizedByContent="true" width="600px" height="400px">
+                <columns>
+                    <column label="id"/>
+                    <column label="name"/>
+                    <column label="address"/>
+                </columns>
+                <template name="model">
+                    <row>
+                        <label value="${each.id}" />
+                        <label value="${each.name}" />
+                        <label value="${each.address}" />
+                    </row>
+                </template>
+            </grid>
+        </box>
+        <button label="reload" onClick="indexController.buttonReload()"/>
+    </box>
+</window>

@@ -1,0 +1,31 @@
+plugins {
+    id 'org.liquibase.gradle' version '2.2.0'
+}
+
+group 'org.example'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+def dbUser = project.properties['dbUser'] ?: gradle.dbUser
+def dbPassword = project.properties['dbPassword'] ?: gradle.dbPassword
+def dbUrl = project.properties['dbUrl'] ?: gradle.dbUrl
+def dbDriver = project.properties['dbDriver'] ?: gradle.dbDriver
+
+liquibase {
+    activities {
+        main {
+            changeLogFile 'src/main/resources/changelog.xml'
+            url dbUrl
+            username dbUser
+            password dbPassword
+        }
+    }
+}
+
+dependencies {
+    liquibaseRuntime("org.liquibase:liquibase-core:3.5.3")
+    liquibaseRuntime(dbDriver)
+}

@@ -1,0 +1,71 @@
+version: '3.3'
+services:
+  db:
+    image: mysql:8.0.32
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    networks:
+      - demo_net
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+  build_app:
+    image: gradle:8.0.2-jdk11-alpine
+    working_dir: /root
+    networks:
+      - demo_net
+    depends_on:
+      - db
+    volumes:
+      - ./:/root
+    command: >
+      /bin/sh -c '
+        sleep 10s &&
+        gradle clean build liquibase:update \
+          -PdbUser=root \
+          -PdbPassword=root \
+          -PdbUrl=jdbc:mysql://db:3306/test_db \
+          -PdbDriver=mysql:mysql-connector-java:8.0.18
+      '
+  server:
+    image: quay.io/wildfly/wildfly:24.0.0.Final
+    networks:
+      - demo_net
+    depends_on:
+      - db
+      - build_app
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+    command: >
+      /bin/sh -c '
+        /opt/jboss/wildfly/bin/add-user.sh admin admin --silent &&
+        /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
+      '
+  deploy_app:
+    image: quay.io/wildfly/wildfly:24.0.0.Final
+    working_dir: /root
+    networks:
+      - demo_net
+    depends_on:
+      - db
+      - build_app
+    volumes:
+      - ./:/root
+    command: >
+      /bin/sh -c '
+        sleep 30s &&
+        until ls build/libs/*.ear &> /dev/null; do echo "wait build build_app for deploy_app"; sleep 5s; done;
+        sleep 15s &&
+        /opt/jboss/wildfly/bin/jboss-cli.sh --controller=server:9990 -u=admin -p=admin --connect "deploy driver/mysql-connector-java-8.0.18.jar" || true;
+        /opt/jboss/wildfly/bin/jboss-cli.sh --controller=server:9990 -u=admin -p=admin --connect "data-source add --name=custom_dt --jndi-name=java:/jdbc/custom_dt --driver-name="mysql-connector-java-8.0.18.jar" --driver-class="com.mysql.cj.jdbc.Driver" --connection-url=jdbc:mysql://db:3306/test_db --user-name=root --password=root" || true;
+        /opt/jboss/wildfly/bin/jboss-cli.sh --controller=server:9990 -u=admin -p=admin --connect "undeploy demoEE-1.0-SNAPSHOT.ear" || true;
+        /opt/jboss/wildfly/bin/jboss-cli.sh --controller=server:9990 -u=admin -p=admin --connect "deploy build/libs/demoEE-1.0-SNAPSHOT.ear";
+      '
+networks:
+  demo_net:
+    driver: bridge
+
+# http://localhost:8080/frontend-1.0/

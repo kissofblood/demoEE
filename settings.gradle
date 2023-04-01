@@ -1,0 +1,6 @@
+rootProject.name = "demoEE"
+
+include 'backend'
+include 'frontend'
+include 'liquibase'
+

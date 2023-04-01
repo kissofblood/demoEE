@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'ear'
+}
+
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    deploy project(path:':backend')
+    deploy project(path:':frontend', configuration: 'archives')
+
+    earlib('org.mapstruct:mapstruct:1.5.2.Final')
+}
+
+subprojects {
+    ext {
+        dbUser=project.property('dbUser')
+        dbPassword=project.property('dbPassword')
+        dbUrl=project.property('dbUrl')
+        dbDriver=project.property('dbDriver')
+    }
+}

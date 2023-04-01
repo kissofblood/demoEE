@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="Create public.address" author="september.valentine" runInTransaction="true">
+        <createTable tableName="address">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="apartment" type="varchar(255)"/>
+            <column name="city" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="house" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="i_index" type="varchar(255)" />
+            <column name="street" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="company">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="legal_form" type="varchar(255)"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="address_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="fkgfifm4874ce6mecwj54wdb3ma" references="address(id)"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="branch">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="address_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="fk14f9k065wqeubl6tl0gdumcp5" references="address(id)"/>
+            </column>
+            <column name="company_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fkr5n331c13dyb3kbq1jlo53mh5" references="company(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
